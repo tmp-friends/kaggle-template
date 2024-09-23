@@ -1,0 +1,4 @@
+name: Hoge
+params:
+  model_name: ""
+  img_size: 224

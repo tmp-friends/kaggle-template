@@ -1,0 +1,16 @@
+# ---------- Overriding hydra default configs ----------
+hydra:
+  job:
+    name: infer
+    chdir: true
+  run:
+    dir: output/${hydra.job.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - _self_
+  - dir: dir
+  - model: Hoge
+
+n_folds: 5
+model_dir: "dummy" # 引数から指定
+valid_batch_size: 256
