@@ -1,49 +1,141 @@
-# KaggleTemplate
+## KaggleTemplate
 
-https://github.com/ktakita1011/my_kaggle_docker
+### Build Environment
 
-## What is this
-
-kaggle docker can use GPU
-
-worked on docker version 24.x.x higher
-
-how to build and run
-```bash
-$ cd kaggle-template
-$ docker compose up -d
-```
-
-## Acess jupyter notebook
-acess here http://127.0.0.1:8888
-default jupyter notebook password is "kaggle"
-if u want to change password, look run.sh
-
-## Attach to a running container
-In Visual Code, using attach to a running container.
-https://code.visualstudio.com/docs/devcontainers/attach-container#_attach-to-a-docker-container
-
-## KaggleAPI
-
-https://github.com/Kaggle/kaggle-api
-
-**以下の作業は、ホストPC上で行う**
-
-### （初回のみ）KaggleAPIライブラリのSetup
-
-- KaggleAPIのインストール
+#### 1. install [uv](https://docs.astral.sh/uv/)
 
 ```
-$ pip install kaggle
+$ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-- KaggleAPIトークンを書き込む
+#### 2. Create virtual environment
+
+`pyproject.toml`, `uv.lock`の内容を元に仮想環境を構築
 
 ```
-$ vim ~/.kaggle/kaggle.json
+$ uv sync
 ```
 
-### APIの操作
+#### 3. Activate virtual environment
 
-https://github.com/Kaggle/kaggle-api?tab=readme-ov-file#commands
+```
+$ . .venv/bin/activate
+```
 
+#### 4. Add/Remove package
+
+e.g. numpy v1.26.4
+
+```
+$ uv add "numpy==1.26.4"
+```
+
+```
+$ uv remove numpy
+```
+
+`uv.lock`の更新
+
+```
+$ uv lock
+```
+
+### Prepare Data
+
+inputフォルダにデータをDownload
+
+```
+$ cd input/
+$ kaggle competitions download -c {competition_name}
+$ unzip {competition_name}.zip -d ./{competition_name}
+$ rm -f {competition_name}.zip
+```
+
+### Train model
+
+- Hydra
+
+### Infer
+
+#### Upload model dataset
+
+- `output/upload`フォルダに学習したモデルをcp
+
+- Metadata json fileの生成
+
+```
+$ kaggle datasets init -p output/upload
+```
+
+- `dataset-metadata.json`を編集
+
+```json
+{
+  "title": "${competition_name}-models",
+  "id": "komekami/${competition_name}-models",
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ]
+}
+```
+
+- Kaggle Datasetの作成
+
+```
+$ kaggle datasets create -p output/upload --dir-mode zip
+```
+
+- Kaggle Datasetの更新
+
+```
+$ kaggle datasets version -p output/upload -m 'hoge' --dir-mode zip
+```
+
+
+#### Upload repo dataset
+
+- Metadata json fileの生成
+
+```
+$ kaggle datasets init -p src
+```
+
+- `dataset-metadata.json`を編集
+
+```json
+{
+  "title": "${competition_name}-repo",
+  "id": "komekami/${competition_name}-repo",
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ]
+}
+```
+
+- Kaggle Datasetの作成
+
+```
+$ kaggle datasets create -p src --dir-mode zip
+```
+
+- Kaggle Datasetの更新
+
+```
+$ kaggle datasets version -p src -m 'hoge' --dir-mode zip
+```
+
+#### Kaggle notebook上でInfer実行
+
+
+
+### 参考
+
+- uv: https://docs.astral.sh/uv/
+- uvの使用例: https://zenn.dev/turing_motors/articles/594fbef42a36ee
+- tubo213-san kaggle環境: https://github.com/tubo213/kaggle-child-mind-institute-detect-sleep-states
+- Docker kaggle環境: https://github.com/ktakita1011/my_kaggle_docker
+- kaggle api: https://github.com/Kaggle/kaggle-api
